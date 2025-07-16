@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # 1. 数据库服务 - 只负责启动数据库
+  dameng-db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dameng-db-container-test
+    ports:
+      - "5236:5236"
+    volumes:
+      - dameng-data:/opt/data
+    environment:
+      - SYSDBA_PWD=Dameng123
+      - TZ=Asia/Shanghai
+      - LD_LIBRARY_PATH=/opt/dmdbms/bin
+    restart: unless-stopped
+    user: root
+    healthcheck:
+      test: ["CMD", "/opt/dmdbms/bin/disql", "SYSDBA/Dameng123", "-e", "SELECT 1;"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # 2. 初始化服务 - 负责创建用户和模式
+  dameng-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dameng-init-container
+    depends_on:
+      dameng-db:
+        condition: service_healthy
+    volumes:
+      - ./scripts:/opt/scripts:ro
+    environment:
+      - DB_HOST=dameng-db-container-test
+      - DB_PORT=5236
+    command: ["bash", "/opt/scripts/init_user_schema.sh"]
+    restart: "no"
+
+  # 3. 数据导入服务 - 负责导入dump文件
+  dameng-import:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dameng-import-container
+    depends_on:
+      dameng-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./dumpfile:/opt/init
+      - ./scripts:/opt/scripts
+    environment:
+      - DB_HOST=dameng-db-container-test
+      - DB_PORT=5236
+    command: ["bash", "/opt/scripts/init_import.sh"]
+    restart: "no"
+
+volumes:
+  dameng-data:
+    driver: local
+  
+
+#redis, nacos, 

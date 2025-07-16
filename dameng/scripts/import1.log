@@ -1,0 +1,6 @@
+dimp V8 
+version: 03134284368-20250423-270902-20149
+start dimp: SYSDBA/******@dameng-db-container-test:5236 FILE=htsp_bussiness.dmp DIRECTORY=/opt/scripts SCHEMAS=HTSP_BUSSINESS LOG=import1.log 
+
+[WARNING]open DUMP file fail, check input, please
+terminate import success with 1 warnings

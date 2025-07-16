@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(dos2unix:*)",
+      "Bash(sed:*)",
+      "Bash(ls:*)",
+      "Bash(docker logs:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}
