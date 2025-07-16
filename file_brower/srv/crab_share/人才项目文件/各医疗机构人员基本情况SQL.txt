@@ -1,0 +1,37 @@
+select a.TENANT_ID "医疗机构编号"
+,a.UNIT_NAME as "医疗机构"
+,CASE WHEN b.person_prop in ('1') THEN 1 ELSE 0 END AS "编制人数"
+,CASE WHEN b.job_status in ('1') THEN 1 ELSE 0 END AS "在岗职工数"
+,CASE WHEN b.job_status in ('1') AND b.major_type 
+in ('11','12','13','21','22','31','32','41','42','43','44','50','60','69') THEN 1 ELSE 0 END AS "在岗职工中的卫生技术人员数"
+,CASE WHEN b.job_status in ('1') AND b.major_type 
+in ('11','12') THEN 1 ELSE 0 END AS "在岗职工中的执业(助理)医师数"
+,CASE WHEN b.job_status in ('1') AND b.major_type 
+in ('21','22') THEN 1 ELSE 0 END AS "在岗职工中的注册护士数"
+,CASE WHEN b.job_status in ('22') THEN 1 ELSE 0 END AS "退休人数"
+from SYSTEM_TENANT_BASE a,HR_STAFF_BASEINFO b 
+where a.TENANT_ID = b.TENANT_ID
+--入本单位时间
+--and b.come_hos_date >= null
+--区域
+--and a.unit_area like '%350100%'
+-- 三甲医院
+--and a.unit_grade = '3' and a.unit_level = '1'
+--三级医院
+--and a.unit_grade = '3'
+--二级医院
+--and a.unit_grade = '2'
+-- 全部医院
+--and LEFT(a.unit_type, 1) = 'A'
+-- 基层医疗机构
+--and LEFT(a.unit_type, 1) in ('B','C','D')
+-- 专业公共卫生机构
+--and LEFT(a.unit_type, 1) in ('E','F','H','J','O') 
+-- 其他医疗机构
+--and LEFT(a.unit_type, 1) in ('G','L','M','N','P','Q')
+-- 隶属关系
+--and a.unit_from = '2'
+-- 编制内
+--and b.person_prop = '1'
+-- 编制外
+--and b.person_prop in ('2','2.1','2.2','3','4','5','6','9')

@@ -1,0 +1,210 @@
+= SPEC-001: 低代码图表平台 MVP 设计文档
+:sectnums:
+:toc:
+
+
+== Background
+
+随着企业对数据分析能力需求的提高，许多非技术人员也需要能够快速地构建图表和仪表盘来获得洞察。DataEase 是一个优秀的开源 BI 平台，但部署和定制成本较高。本项目旨在构建一个轻量级、可插拔、低代码图表平台 MVP，具备数据源接入、数据集构建、图表配置和仪表盘布局的基本能力，快速验证可行性。
+
+== Requirements
+
+=== Must Have
+- 支持多个数据源接入（MySQL 为主）
+- 数据集创建（SQL方式 + 字段结构提取）
+- 图表配置功能（绑定数据集字段、预览图表）
+- 图表保存 / 列表 / 更新
+- 仪表盘图表拖拽布局、保存、预览
+- 前后端分离 + Docker Compose 一键部署
+
+=== Should Have
+- 拖拽字段构建图表的可视化配置器
+- 图表类型切换（柱状图、折线图、饼图）
+- 图表样式配置（图例、颜色、轴标题）
+- 仪表盘只读分享模式
+
+=== Could Have
+- 数据导出为 Excel
+- 图表导出为 PNG
+- 权限控制与用户分组
+
+== Method
+
+=== 架构图
+[plantuml, architecture, png]
+----
+@startuml
+package "前端 (Vue)" {
+  [DashboardEditor]
+  [ChartEditor]
+  [ChartPreview]
+}
+
+package "后端 (Spring Boot)" {
+  [DatasetController]
+  [ChartController]
+  [DashboardController]
+  [DynamicSqlService]
+}
+
+package "数据库 (MySQL)" {
+  entity "dataset"
+  entity "chart"
+  entity "dashboard"
+  entity "dashboard_chart"
+}
+
+[ChartEditor] --> [ChartController]
+[DashboardEditor] --> [DashboardController]
+[ChartPreview] --> [ChartController] : GET /preview
+
+[ChartController] --> [chart]
+[DatasetController] --> [dataset]
+[DashboardController] --> [dashboard]
+[DashboardController] --> [dashboard_chart]
+[DynamicSqlService] --> [dataset]
+@enduml
+----
+
+=== 模块划分
+
+==== 数据源模块（可扩展）
+（MVP 中 mock 或使用配置数据库连接）
+
+==== 数据集模块
+- `dataset` 表结构：
+[source,sql]
+----
+CREATE TABLE dataset (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  query_sql TEXT,
+  data_source_id BIGINT,
+  fields_json TEXT,
+  create_time TIMESTAMP,
+  update_time TIMESTAMP
+);
+----
+
+- 关键接口：
+  - `GET /api/dataset`
+  - `GET /api/dataset/{id}/fields`
+
+==== 图表配置模块
+- `chart` 表结构：
+[source,sql]
+----
+CREATE TABLE chart (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  chart_type VARCHAR(50),
+  dataset_id BIGINT,
+  field_mapping TEXT,
+  style_config TEXT,
+  create_time TIMESTAMP,
+  update_time TIMESTAMP
+);
+----
+
+- 字段映射 JSON 示例：
+[source,json]
+----
+{
+  "xAxis": ["region"],
+  "yAxis": ["sales"],
+  "groupBy": ["month"]
+}
+----
+
+- 接口：
+  - `POST /api/chart` 保存图表
+  - `GET /api/chart/{id}/preview` 返回动态拼接 SQL 的结果
+
+==== 仪表盘模块
+- `dashboard` + `dashboard_chart`：
+[source,sql]
+----
+CREATE TABLE dashboard (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  description TEXT
+);
+
+CREATE TABLE dashboard_chart (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  dashboard_id BIGINT,
+  chart_id BIGINT,
+  x INT, y INT, w INT, h INT
+);
+----
+
+- 布局数据示例（vue-grid-layout 对应）：
+[source,json]
+----
+[
+  { "chartId": 1, "x": 0, "y": 0, "w": 4, "h": 6 },
+  { "chartId": 2, "x": 4, "y": 0, "w": 4, "h": 6 }
+]
+----
+
+- 接口：
+  - `GET /api/dashboard`
+  - `GET /api/dashboard/{id}`
+  - `POST /api/dashboard/{id}/layout`
+
+== Implementation
+
+=== 后端 Spring Boot
+- 模块结构：
+  - `ChartController`, `DatasetController`, `DashboardController`
+  - `DynamicSqlService` 拼接并执行 SQL
+  - JPA 实体映射所有表
+
+- 构建：
+[source,bash]
+----
+mvn clean package -DskipTests
+----
+
+=== 前端 Vue 3 + Tailwind
+- 页面：
+  - `ChartEditor.vue`, `DashboardEditor.vue`, `DashboardList.vue`, `ChartPreview.vue`
+
+- 使用组件：
+  - `vue-grid-layout` 用于仪表盘布局
+  - `G2Plot` 用于图表渲染
+  - `vuedraggable` 支持字段绑定
+
+=== 部署（Docker Compose）
+[source,yaml]
+----
+services:
+  db:
+    image: mysql:8
+  backend:
+    build: ./chart-backend-prototype
+  frontend:
+    build: ./frontend
+----
+
+== Milestones
+
+1. ✅ 数据集模块实现并测试字段结构提取
+2. ✅ 图表配置页面（字段映射、预览、保存）
+3. ✅ 动态 SQL 拼接和预览接口
+4. ✅ 仪表盘图表拖拽布局页面
+5. ✅ Docker Compose 支持并一键部署
+
+== Gathering Results
+
+- ✅ 已通过原型成功实现 MVP 的完整闭环
+- ✅ 实测图表可在不同数据集下预览、保存、布局组合
+- ✅ 可扩展性良好：后续可加入低代码表达式、权限系统、导出功能
+
+建议邀请测试用户试用仪表盘构建和图表设计，收集以下反馈：
+
+- 字段拖拽体验是否清晰
+- 图表渲染是否满足可视化需求
+- 仪表盘操作是否直观
+- 图表响应速度和数据量性能评估
+

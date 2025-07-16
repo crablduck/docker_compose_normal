@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    container_name: filebrowser
+    ports:
+      - "18080:80"
+    environment:
+      - PUID=1000  # 可根据需要修改为主机用户ID
+      - PGID=1000  # 可根据需要修改为主机用户组ID
+    volumes:
+      - ./srv:/srv
+      - ./database:/database
+      - ./config:/config
+    restart: unless-stopped 

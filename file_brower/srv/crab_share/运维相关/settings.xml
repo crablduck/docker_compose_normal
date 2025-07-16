@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<localRepository>F:/Tools/respository</localRepository>
+	<pluginGroups>
+        <pluginGroup>org.sonarsource.scanner.maven</pluginGroup>
+    </pluginGroups>
+	<servers>
+		<server>
+			<username>admin</username>
+			<password>etong008</password>
+			<id>thirdparty</id>
+		</server>
+		<server>  
+			<id>releases</id>  
+			<username>admin</username>  
+			<password>etong008</password>  
+			</server>  
+ 		<server>  
+			  <id>snapshots</id>  
+			  <username>admin</username>  
+ 			<password>etong008</password>  
+ 		</server>
+	</servers>
+	
+	<mirrors>
+		<mirror> 
+			<id>etongnexus</id> 
+			<name>etongnexus maven</name> 
+			<url>http://172.16.0.238:8081/repository/maven-public/</url> 
+			<mirrorOf>central</mirrorOf> 
+		</mirror>
+	</mirrors>
+	
+	
+</settings>

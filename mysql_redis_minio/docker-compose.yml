@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  crab-mysql:
+    image: mysql:8.0
+    container_name: crab-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: go_chat
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_USER: crab
+      MYSQL_PASSWORD: 123456
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  crab-redis:
+    image: redis:7.0
+    container_name: crab-redis
+    restart: always
+    ports:
+      - "6389:6379"
+    volumes:
+      - redis_data:/data
+
+  crab-minio:
+    image: minio/minio:latest
+    container_name: crab-minio
+    restart: always
+    ports:
+      - "9000:9000"         # MinIO S3 API
+      - "9001:9001"         # MinIO 控制台 UI
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:

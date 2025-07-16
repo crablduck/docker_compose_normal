@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "19000:9000"       # Web UI 端口
+      - "19443:9443"       # HTTPS UI（可选）
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock    # 授权控制 Docker
+      - portainer_data:/data                         # 数据持久化
+
+volumes:
+  portainer_data:
