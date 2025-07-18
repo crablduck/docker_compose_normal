@@ -108,7 +108,7 @@ services:
     image: ${UI_IMAGE:-ghcr.io/apache/skywalking/ui:latest}
     container_name: ui
     ports:
-      - "8080:8080"
+      - "13080:8080"
     networks:
       - demo
     environment:
