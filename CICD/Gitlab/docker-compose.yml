@@ -21,3 +21,4 @@ services:
 
   #root
   #pass: docker compose exec gitlab grep 'Password:' /etc/gitlab/initial_root_password
+  # 修改后的密码都是 Weidehua@678678

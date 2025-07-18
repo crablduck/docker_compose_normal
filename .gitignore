@@ -4,3 +4,4 @@ dameng/DMInstall.bin
 file_brower/database/filebrowser.db
 nacos/docker-compose-file/mysql/
 nacos/docker-compose-file/standalone-logs/
+/CICD/Harbor/common/
