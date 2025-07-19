@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    ports:
+      - "8081:8081"
+      - "5001:5000"  # Docker hosted registry port
+    volumes:
+      - nexus_data:/nexus-data
+volumes:
+  nexus_data:
