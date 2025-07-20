@@ -1,5 +1,3 @@
-# admin
-# Harbor12345
 services:
   log:
     image: goharbor/harbor-log:v2.13.1
@@ -13,7 +11,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /var/log/harbor/:/var/log/docker/:z
+      - /usr/local/harbor/data/log/harbor/:/var/log/docker/:z
       - type: bind
         source: ./common/config/log/logrotate.conf
         target: /etc/logrotate.d/logrotate.conf
@@ -35,10 +33,10 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /data/registry:/storage:z
+      - /usr/local/harbor/data/registry:/storage:z
       - ./common/config/registry/:/etc/registry/:z
       - type: bind
-        source: /data/secret/registry/root.crt
+        source: /usr/local/harbor/data/secret/registry/root.crt
         target: /etc/registry/root.crt
       - type: bind
         source: ./common/config/shared/trust-certificates
@@ -65,7 +63,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /data/registry:/storage:z
+      - /usr/local/harbor/data/registry:/storage:z
       - ./common/config/registry/:/etc/registry/:z
       - type: bind
         source: ./common/config/registryctl/config.yml
@@ -94,7 +92,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /data/database:/var/lib/postgresql/data:z
+      - /usr/local/harbor/data/database:/var/lib/postgresql/data:z
     networks:
       harbor:
     env_file:
@@ -119,17 +117,17 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /data/ca_download/:/etc/core/ca/:z
-      - /data/:/data/:z
+      - /usr/local/harbor/data/ca_download/:/etc/core/ca/:z
+      - /usr/local/harbor/data/:/data/:z
       - ./common/config/core/certificates/:/etc/core/certificates/:z
       - type: bind
         source: ./common/config/core/app.conf
         target: /etc/core/app.conf
       - type: bind
-        source: /data/secret/core/private_key.pem
+        source: /usr/local/harbor/data/secret/core/private_key.pem
         target: /etc/core/private_key.pem
       - type: bind
-        source: /data/secret/keys/secretkey
+        source: /usr/local/harbor/data/secret/keys/secretkey
         target: /etc/core/key
       - type: bind
         source: ./common/config/shared/trust-certificates
@@ -184,7 +182,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /data/job_logs:/var/log/jobs:z
+      - /usr/local/harbor/data/job_logs:/var/log/jobs:z
       - type: bind
         source: ./common/config/jobservice/config.yml
         target: /etc/jobservice/config.yml
@@ -211,7 +209,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - /data/redis:/var/lib/redis
+      - /usr/local/harbor/data/redis:/var/lib/redis
     networks:
       harbor:
     depends_on:
