@@ -21,12 +21,13 @@ services:
       context: .
       dockerfile: ./image/mysql/8/Dockerfile
     image: example/mysql:8.0.30
+    restart: unless-stopped
     env_file:
       - ../env/mysql.env
     volumes:
       - ./mysql:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 5s
