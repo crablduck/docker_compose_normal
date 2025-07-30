@@ -4,6 +4,7 @@ services:
   kafka:
     image: bitnami/kafka:3.6
     container_name: kafka
+    restart: always
     ports:
       - "${KAFKA_EXTERNAL_PORT:-9092}:9092"
     environment:
@@ -22,6 +23,7 @@ services:
       - kafka-net
 
   kafka-ui:
+    restart: always
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
