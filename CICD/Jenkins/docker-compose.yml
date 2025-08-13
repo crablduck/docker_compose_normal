@@ -1,50 +1,38 @@
-version: "3.7"
-
-# admin 密码在 控制台会出现
-# First admin user :  Crab Weidehua@678678
+version: '3.8'
 
 services:
-  jenkins-docker:
-    image: docker:dind
-    container_name: jenkins-docker
-    privileged: true
-    networks:
-      jenkins:
-        aliases:
-          - docker
-    environment:
-      - DOCKER_TLS_CERTDIR=/certs
-    volumes:
-      - ./jenkins-docker-certs:/certs/client
-      - ./jenkins-data:/var/jenkins_home
-    ports:
-      - "2376:2376"
-    command: ["--storage-driver", "overlay2"]
-
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: jenkins
-    privileged: true           # 若希望直接构建 Docker 镜像，否则可去掉并挂载 host docker.sock
-    user: root
-    networks:
-      - jenkins
-    depends_on:
-      - jenkins-docker
-    environment:
-      - DOCKER_HOST=tcp://docker:2376
-      - DOCKER_CERT_PATH=/certs/client
-      - DOCKER_TLS_VERIFY=1
-    volumes:
-      - ./jenkins-data:/var/jenkins_home
-      - ./jenkins-docker-certs:/certs/client:ro
+  jenkins-controller:
+    #image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jenkins-controller
     ports:
       - "14080:8080"
       - "50000:50000"
+    volumes:
+      - ./jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock      # 挂载宿主机 Docker sock
+    networks:
+      - jenkins
+    environment:
+      - JENKINS_OPTS=--httpPort=8080
+      - HTTP_PROXY=http://host.docker.internal:7890
+      - HTTPS_PROXY=http://host.docker.internal:7890
+      - NO_PROXY=localhost,127.0.0.1
+      - http_proxy=http://host.docker.internal:7890
+      - https_proxy=http://host.docker.internal:7890
+      - no_proxy=localhost,127.0.0.1
+    restart: unless-stopped
+    user: root
+
+volumes:
+  jenkins-data:
+  jenkins-agent-workspace:
+  jenkins-docker-certs:
+
 
 networks:
   jenkins:
     driver: bridge
 
-volumes:
-  jenkins-docker-certs:
-  jenkins-data:

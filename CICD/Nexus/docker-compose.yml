@@ -1,0 +1,10 @@
+version: '3'
+services:
+  nexus:
+    image: sonatype/nexus3
+    restart: always
+    ports:
+      - "8081:8081"
+      - "5001:5000"  # Docker Registry V2 接口
+    volumes:
+      - ./nexus-data:/nexus-data
