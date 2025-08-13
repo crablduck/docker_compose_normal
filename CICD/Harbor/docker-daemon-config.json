@@ -1,0 +1,7 @@
+{
+  "insecure-registries": [
+    "27.155.120.141:15800",
+    "harbor.crab.com:15800"
+  ],
+  "registry-mirrors": []
+}

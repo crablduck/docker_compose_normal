@@ -1,76 +1,73 @@
-name: affine
+version: '3.8'
+
 services:
   affine:
-    image: ghcr.io/toeverything/affine:${AFFINE_REVISION:-stable}
-    container_name: affine_server
+    image: ghcr.io/toeverything/affine:stable
+    container_name: affine-app
+    restart: unless-stopped
     ports:
-      - '${PORT:-3010}:3010'
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      affine_migration:
-        condition: service_completed_successfully
+      - "3010:3000"
     volumes:
-      # custom configurations
-      - ${UPLOAD_LOCATION}:/root/.affine/storage
-      - ${CONFIG_LOCATION}:/root/.affine/config
-    env_file:
-      - .env
+      - affine_data:/app/data
+      - affine_config:/app/config
+      - affine_storage:/app/storage
     environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://affine:affine123456@postgres:5432/affine
       - REDIS_SERVER_HOST=redis
-      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_DATABASE:-affine}
-      - AFFINE_INDEXER_ENABLED=false
-    restart: unless-stopped
-
-  affine_migration:
-    image: ghcr.io/toeverything/affine:${AFFINE_REVISION:-stable}
-    container_name: affine_migration_job
-    volumes:
-      # custom configurations
-      - ${UPLOAD_LOCATION}:/root/.affine/storage
-      - ${CONFIG_LOCATION}:/root/.affine/config
-    command: ['sh', '-c', 'node ./scripts/self-host-predeploy.js']
-    env_file:
-      - .env
-    environment:
-      - REDIS_SERVER_HOST=redis
-      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_DATABASE:-affine}
-      - AFFINE_INDEXER_ENABLED=false
+      - REDIS_SERVER_PORT=6379
+      - AFFINE_AUTO_MIGRATE=true
+      - PRISMA_MIGRATE_DEPLOY=true
+      - AFFINE_INIT_DB=true
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  redis:
-    image: redis
-    container_name: affine_redis
-    healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
+      - postgres
+      - redis
+    networks:
+      - affine-network
 
   postgres:
-    image: pgvector/pgvector:pg16
-    container_name: affine_postgres
-    volumes:
-      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_DATABASE:-affine}
-      POSTGRES_INITDB_ARGS: '--data-checksums'
-      # you better set a password for you database
-      # or you may add 'POSTGRES_HOST_AUTH_METHOD=trust' to ignore postgres security policy
-      POSTGRES_HOST_AUTH_METHOD: trust
-    healthcheck:
-      test:
-        ['CMD', 'pg_isready', '-U', "${DB_USERNAME}", '-d', "${DB_DATABASE:-affine}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    image: postgres:15-alpine
+    container_name: affine-postgres
     restart: unless-stopped
+    environment:
+      POSTGRES_DB: affine
+      POSTGRES_USER: affine
+      POSTGRES_PASSWORD: affine123456
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - affine-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U affine"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: affine-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6380:6379"
+    networks:
+      - affine-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  affine_data:
+  affine_config:
+  affine_storage:
+  postgres_data:
+  redis_data:
+
+networks:
+  affine-network:
+    driver: bridge

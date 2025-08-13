@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  crab-minio:
+    image: minio/minio:latest
+    container_name: crab-minio
+    restart: always
+    ports:
+      - "9000:9000"         # MinIO S3 API
+      - "9001:9001"         # MinIO 控制台 UI
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+      MINIO_SERVER_URL: http://localhost:9000
+      MINIO_DOMAIN: localhost
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+      # 移除 MINIO_DEFAULT_BUCKETS，手动控制 bucket 创建和权限
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - minio-network
+
+volumes:
+  minio_data:
+    driver: local
+
+networks:
+  minio-network:
+    driver: bridge

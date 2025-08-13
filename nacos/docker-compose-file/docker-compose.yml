@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   nacos:
-    image: nacos/nacos-server:${NACOS_VERSION}
+    image: nacos/nacos-server:v3.0.2
     container_name: nacos-standalone-mysql
     env_file:
       - ../env/nacos-standalone-mysql.env
@@ -17,9 +17,9 @@ services:
     restart: always
   mysql:
     container_name: mysql
-    build:
-      context: .
-      dockerfile: ./image/mysql/8/Dockerfile
+#    build:
+#      context: .
+#      dockerfile: ./image/mysql/8/Dockerfile
     image: example/mysql:8.0.30
     restart: always
     env_file:

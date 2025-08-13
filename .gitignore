@@ -6,3 +6,14 @@ nacos/docker-compose-file/mysql/
 nacos/docker-compose-file/standalone-logs/
 /CICD/Harbor/common/
 mq/kafka/data
+
+# Gitlab 数据目录
+CICD/Gitlab/gitlab_home/
+
+# AFFiNE note_app 数据目录
+note_app/postgres/
+note_app/storage/
+note_app/config/
+note_app/logs/
+note_app/backups/
+note_app/.env
