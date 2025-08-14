@@ -19,8 +19,7 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     volumes:
       - ./data:/bitnami/kafka
-    networks:
-      - kafka-net
+
 
   kafka-ui:
     restart: always
@@ -33,9 +32,5 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${KAFKA_HOST:-kafka}:9092
     depends_on:
       - kafka
-    networks:
-      - kafka-net
 
-networks:
-  kafka-net:
-    driver: bridge
+
