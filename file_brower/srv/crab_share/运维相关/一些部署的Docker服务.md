@@ -21,3 +21,12 @@ mysql: 3306 root 123456
 redis 无密码
 minio: minioadmin minioadmin
 kafka 无密码
+
+
+
+
+
+jenkins:
+Jenkins 172.16.1.228 8081端口
+Crab
+Weidehua@678678

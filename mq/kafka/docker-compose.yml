@@ -1,10 +1,10 @@
 version: '3.8'
-
 services:
   kafka:
-    image: bitnami/kafka:3.6
+    image: 27.155.120.141:15800/common-service/kafka:3.6
     container_name: kafka
     restart: always
+    privileged: true
     ports:
       - "${KAFKA_EXTERNAL_PORT:-9092}:9094"
     environment:
@@ -18,14 +18,14 @@ services:
       - KAFKA_KRAFT_CLUSTER_ID=kYydZq1wR7aZGr4H7FDv5w
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     volumes:
-      - ./data:/bitnami/kafka
+      - kafka-data:/bitnami/kafka
     networks:
       - kafka-net
 
-
   kafka-ui:
     restart: always
-    image: provectuslabs/kafka-ui:latest
+    privileged: true
+    image: 27.155.120.141:15800/common-service/kafka-ui:latest
     container_name: kafka-ui
     ports:
       - "${KAFKA_UI_PORT:-10180}:8080"
@@ -37,8 +37,10 @@ services:
     networks:
       - kafka-net
 
+volumes:
+  kafka-data:
+    driver: local
+
 networks:
   kafka-net:
     driver: bridge
-
-
