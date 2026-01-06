@@ -17,3 +17,7 @@ note_app/config/
 note_app/logs/
 note_app/backups/
 note_app/.env
+.idea/docker_compose_normal.iml
+.idea/modules.xml
+.idea/workspace.xml
+.idea/workspace.xml
